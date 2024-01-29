@@ -1,0 +1,360 @@
+﻿@using System.Globalization;
+
+@{
+    ViewData["Title"] = "Programa";
+}
+
+<style>
+
+    @@media screen and (max-width: 600px) {
+      .btn {
+            display: block;
+            width: 100%;
+            text-align:center;
+      }
+    }
+</style>
+
+<div class="row justify-content-center">
+
+    <h1>Programa</h1>
+
+    <div class="col-md-10">
+
+        <div class="row justify-content-between mb-3">
+            
+        @{
+            int contador = 0;
+                CultureInfo ci = new CultureInfo("es-ES");
+                ci = new CultureInfo("es-ES");
+            foreach (var item in (List<DateTime>)ViewBag.Fechas)
+            {
+                contador++;
+                                <div class="col-2 p-2 alert" id="divFechas-@contador">
+                                    <input type="hidden" id="txtFechas-@contador" value="@item.ToString("dd/MM/yyyy")" />
+                                    @item.ToString("dd-MMMM-yyyy",ci)
+                                </div>
+            }
+        }
+             
+
+        </div>
+    </div>
+
+    <div class="col-md-10">
+        
+        <div class="row">
+
+            <div class="col-12">
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label>Asignación</label>
+                    </div>
+
+                    <div class="col-3 col-md-2">
+                        <select id="txtNumAsignacion" style="width:100%">
+                            <option value="3" selected >3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                        </select>
+                        @* <input type="number" class="form-control" id="txtNumAsignacion" min="3" value="3" /> *@
+                    </div>
+                    <div class="col-9 col-md-6">
+                        @* <input type="text" class="form-control" id="txtAsignacion" /> *@
+                        <select id="txtAsignacion" style="width:100%">
+                            <option value="" selected="selected">Seleccione una asignación...</option>
+                            @foreach(var item in (List<AsignacionModel>)ViewBag.Asignaciones)
+                            {
+                                <option value="@item.Id">@item.Nombre</option>
+                            }
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="col-12">
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label>Nombre</label>
+                    </div>
+                    <div class="col-md-8">
+                        <select id="txtNombre" style="width:100%">
+                            <option value="" selected="selected">Seleccione un estudiante...</option>
+                            @foreach (var item in (List<EstudianteModel>)ViewBag.Estudiantes)
+                            {
+                                <option value="@item.Id">@item.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-12">
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label>Ayudante</label>
+                    </div>
+
+                    <div class="col-md-8">
+                        <select id="txtAyudante" style="width:100%">
+                            <option value="" selected="selected">Seleccione un ayudante...</option>
+                            @foreach (var item in (List<EstudianteModel>)ViewBag.Estudiantes)
+                            {
+                                <option value="@item.Id">@item.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-12 mb-2">
+
+                <button class="btn btn-success m-1" id="btnAgregarAsignacion">
+                    Agregar asignación
+                </button>
+                <button class="btn btn-primary m-1" id="btnTerminarDia">
+                    Terminar día <span id="spnDia"></span>
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-10">
+        <div class=" table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Ayudante</th>
+                        <th>Asignación</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tblAsignaciones">
+                </tbody>
+            </table>
+        </div>
+        
+
+    </div>
+    <div class="col-12 mb-2">
+        <button class="btn btn-info m-1" id="btnGenerar">
+            Generar asignaciones
+        </button>
+
+    </div>
+</div>
+
+
+@section Scripts{
+
+    <script>
+
+        // Control de fechas
+        var controlFechas = [
+            {
+                orden: 1,
+                estado: 'pendiente'
+            },
+            {
+                orden: 2,
+                estado: 'pendiente'
+            },
+            {
+                orden: 3,
+                estado: 'pendiente'
+            },
+            {
+                orden: 4,
+                estado: 'pendiente'
+            }
+        ];
+
+        // Control de asignaciones
+        var asignaciones = [];
+
+        function LimpiarDatos(lastNumber){
+            
+            $("#txtNumAsignacion").val((parseInt(lastNumber)+1)).change();
+            $("#txtAsignacion").val('').change();
+            $("#txtNombre").val('').change();
+            $("#txtAyudante").val('').change();
+        };
+
+        function EncontrarPendienteFechaMenor(){
+
+            for(var i = 0; i < controlFechas.length; i++){
+
+                if (controlFechas[i].estado == 'pendiente'){
+                    return controlFechas[i].orden;
+                }
+            }
+            return 0;
+        }
+
+        function LimpiarTabla(){
+            $("#tblAsignaciones").empty();
+        }
+
+        function ActualizarTabla(model){
+
+            $("#tblAsignaciones").empty();
+
+            const getOrden = EncontrarPendienteFechaMenor();
+
+            for (var i = 0; i < model.length; i++){
+
+                if (model[i].orden == getOrden) {
+                    const id = model[i].id;
+                    const asignacion = model[i].asignacion;
+                    const nombre = model[i].nombre;
+                    const ayudante = model[i].ayudante;
+
+
+                    $("#tblAsignaciones").append("<tr><td>" + nombre + "</td><td>" + ayudante + "</td><td>" + asignacion +
+                        "</td><td><button class='btn btn-danger btn-sm' onclick=EliminarAsignacion('" + id + "')>Eliminar</button></td></tr>");
+
+
+                }
+            }
+
+        }
+
+        function ActualizarTablaCompleta(){
+            $("#tblAsignaciones").empty();
+
+            const getOrden = EncontrarPendienteFechaMenor();
+
+            for (var i = 0; i < model.length; i++) {
+
+                const id = model[i].id;
+                const asignacion = model[i].asignacion;
+                const nombre = model[i].nombre;
+                const ayudante = model[i].ayudante;
+
+                $("#tblAsignaciones").append("<tr><td>" + nombre + "</td><td>" + ayudante + "</td><td>" + asignacion +
+                    "</td><td><button class='btn btn-danger btn-sm' onclick=EliminarAsignacion('" + id + "')>Eliminar</button></td></tr>");
+
+            }
+        }
+
+
+        function GetUniqueId(){
+            return Date.now().toString(36) + Math.floor(Math.pow(10, 12) + Math.random() * 9 * Math.pow(10, 12)).toString(36);
+        }
+
+        function EliminarAsignacion(id){
+            
+            var aux = [];
+
+            for (var i = 0; i < asignaciones.length; i++) {
+
+                if (asignaciones[i].id != id){
+                    aux.push(asignaciones[i]);
+                }
+            }
+            asignaciones = aux;
+
+            ActualizarTabla(asignaciones);
+        }
+
+        window.onload = function (e) {
+
+            $("#txtNumAsignacion").select2();
+
+            $("#txtAsignacion").select2();
+
+            $("#txtNombre").select2();
+
+            $("#txtAyudante").select2();
+
+
+            // Valores de entrada
+            $("#divFechas-1").addClass("alert-success");
+            $("#spnDia").append($("#divFechas-1").text());
+
+            $("#btnAgregarAsignacion").click((e) => {
+                e.preventDefault();
+
+                if ($("#txtNumAsignacion").val() == "" || $("#txtAsignacion").val() == "" || $("#txtNombre").val() == ""){
+                    alert("Debe llenar los campos requeridos.");
+                    return;
+                }
+
+                const orden = EncontrarPendienteFechaMenor();
+
+                const asignacion = {
+                    id: GetUniqueId(),
+                    orden,
+                    fecha: $("#txtFechas-" + orden + "").val(),
+                    asignacion: $("#txtNumAsignacion").val() + '-' + $("#txtAsignacion option:selected").text(),
+                    nombre: $("#txtNombre option:selected").text(),
+                    ayudante: $("#txtAyudante").val() == "" ? "" : $("#txtAyudante option:selected").text()
+                };
+
+                asignaciones.push(asignacion);
+
+                LimpiarDatos($("#txtNumAsignacion").val());
+                ActualizarTabla(asignaciones);
+            });
+
+            $("#btnTerminarDia").click(e => {
+                e.preventDefault();
+
+                const orden = EncontrarPendienteFechaMenor();
+
+                for (var i = 0; i < controlFechas.length; i++) {
+
+                    if (controlFechas[i].orden == orden){
+                        controlFechas[i].estado = 'terminado';
+
+                        $("#divFechas-" + orden + "").removeClass("alert-success");
+                        $("#divFechas-" + orden + "").addClass("alert-secondary");
+
+                        if ((orden + 1) <= 4){
+                            $("#divFechas-" + (orden + 1) + "").addClass("alert-success");
+                            $("#spnDia").text('');
+                            $("#spnDia").append($("#divFechas-"+(orden+1)+"").text());
+                        }
+                    }
+
+                }
+
+                LimpiarDatos(2);
+                LimpiarTabla();
+
+            });
+
+            $("#btnGenerar").click(e => {
+                e.preventDefault();
+
+                if(asignaciones.length <= 0){
+                    alert("Debe agregar asignaciones");
+                    return;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("GenerarPrograma","Home")",
+                    data: { model : JSON.stringify(asignaciones) },
+                    success: function(e){
+                        alert(e);
+                        window.location.replace("@Url.Action("Lista","Home")");
+                    }
+                });
+
+            });
+        };
+
+    </script>
+
+}

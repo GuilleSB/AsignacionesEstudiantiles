@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-10">
+
+            <!-- Se cuentan 4 semanas hacia adelante siempre -->
+            <div class="row">
+                <div class="col-md-4">
+
+                    <label for="dtmFechaInicioPrograma">Fecha de inicio del programa</label>
+                </div>
+                <div class="col-md-8">
+                    <input type="date" id="dtmFechaInicioPrograma" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+
+                </div>
+            </div>
+            <br />
+            <button class="btn btn-success" id="btnCrearPrograma">
+                CREAR PROGRAMA
+            </button>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        $("#btnCrearPrograma").click((e) => {
+            e.preventDefault();
+
+            if ($("#dtmFechaInicioPrograma").val() == '' || $("#dtmFechaInicioPrograma").val() == null){
+                alert("Por favor elija una fecha válida");
+            } else {
+                window.location = '@Url.Action("Programa","Home")?fechaInicio=' + $("#dtmFechaInicioPrograma").val() + '';
+            }
+        });
+
+    </script>
+
+}
