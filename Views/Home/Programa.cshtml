@@ -30,10 +30,10 @@
             foreach (var item in (List<DateTime>)ViewBag.Fechas)
             {
                 contador++;
-                                <div class="col-2 p-2 alert" id="divFechas-@contador">
-                                    <input type="hidden" id="txtFechas-@contador" value="@item.ToString("dd/MM/yyyy")" />
-                                    @item.ToString("dd-MMMM-yyyy",ci)
-                                </div>
+                                        <div class="col-2 p-2 alert" id="divFechas-@contador">
+                                            <input type="hidden" id="txtFechas-@contador" value="@item.ToString("dd/MM/yyyy")" />
+                                            @item.ToString("dd-MMMM-yyyy",ci)
+                                        </div>
             }
         }
              
@@ -160,7 +160,7 @@
     <script>
 
         // Control de fechas
-        var controlFechas = [
+        var controlFechas = localStorage.getItem("controlFechas") === null ? [
             {
                 orden: 1,
                 estado: 'pendiente'
@@ -177,10 +177,10 @@
                 orden: 4,
                 estado: 'pendiente'
             }
-        ];
+        ] : JSON.parse(localStorage.getItem("controlFechas"));
 
         // Control de asignaciones
-        var asignaciones = [];
+        var asignaciones = localStorage.getItem("asignaciones") === null ? [] : JSON.parse(localStorage.getItem("asignaciones"));
 
         function LimpiarDatos(lastNumber){
             
@@ -229,25 +229,6 @@
 
         }
 
-        function ActualizarTablaCompleta(){
-            $("#tblAsignaciones").empty();
-
-            const getOrden = EncontrarPendienteFechaMenor();
-
-            for (var i = 0; i < model.length; i++) {
-
-                const id = model[i].id;
-                const asignacion = model[i].asignacion;
-                const nombre = model[i].nombre;
-                const ayudante = model[i].ayudante;
-
-                $("#tblAsignaciones").append("<tr><td>" + nombre + "</td><td>" + ayudante + "</td><td>" + asignacion +
-                    "</td><td><button class='btn btn-danger btn-sm' onclick=EliminarAsignacion('" + id + "')>Eliminar</button></td></tr>");
-
-            }
-        }
-
-
         function GetUniqueId(){
             return Date.now().toString(36) + Math.floor(Math.pow(10, 12) + Math.random() * 9 * Math.pow(10, 12)).toString(36);
         }
@@ -263,11 +244,13 @@
                 }
             }
             asignaciones = aux;
-
+            localStorage.setItem("asignaciones", JSON.stringify(asignaciones));
             ActualizarTabla(asignaciones);
         }
 
         window.onload = function (e) {
+
+            ActualizarTabla(asignaciones);
 
             $("#txtNumAsignacion").select2();
 
@@ -302,6 +285,7 @@
                 };
 
                 asignaciones.push(asignacion);
+                localStorage.setItem("asignaciones", JSON.stringify(asignaciones));
 
                 LimpiarDatos($("#txtNumAsignacion").val());
                 ActualizarTabla(asignaciones);
@@ -316,6 +300,7 @@
 
                     if (controlFechas[i].orden == orden){
                         controlFechas[i].estado = 'terminado';
+                        localStorage.setItem("controlFechas", JSON.stringify(controlFechas));
 
                         $("#divFechas-" + orden + "").removeClass("alert-success");
                         $("#divFechas-" + orden + "").addClass("alert-secondary");

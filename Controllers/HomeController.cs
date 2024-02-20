@@ -145,6 +145,20 @@ namespace AsignacionesEstudiantiles.Controllers
             }
         }
 
+        public IActionResult Eliminar(string id)
+        {
+            try
+            {
+                var result = _getData.DeletePrograma(id);
+
+                return result > 0 ? Ok("Eliminado correctamente") : BadRequest("No se eliminó ningún registro"); 
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost]
         public IActionResult CompararFechas(DateTime fechaInicio, DateTime fechaFin)
         {

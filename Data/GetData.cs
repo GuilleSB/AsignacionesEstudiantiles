@@ -1,6 +1,8 @@
 ﻿using AsignacionesEstudiantiles.Models;
 using System.Data.SqlClient;
 using System.Globalization;
+using System.IO;
+using System.Reflection;
 
 namespace AsignacionesEstudiantiles.Data
 {
@@ -122,6 +124,26 @@ namespace AsignacionesEstudiantiles.Data
                     $"'{model.asignacion}','{model.nombre}','{model.ayudante}','{path}')";
                 SqlCommand comm = new(insert, conn);
 
+                conn.Open();
+
+                try
+                {
+                    return comm.ExecuteNonQuery();
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            }
+        }
+
+        public int DeletePrograma(string id)
+        {
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                string delete = $"DELETE PROGRAMA WHERE ID = '{id}'";
+                SqlCommand comm = new(delete, conn);
                 conn.Open();
 
                 try

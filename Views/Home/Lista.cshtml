@@ -1,5 +1,16 @@
 ﻿@using System.Globalization;
 
+<style>
+
+    @@media screen and (max-width: 1200px) {
+        .btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
 <div class="row justify-content-center">
     <div class="col-md-10">
         <h2 class="h2">Lista de asignaciones</h2>
@@ -57,7 +68,10 @@
                                                     <td>@item.Asignacion</td>
                                                     <td>@item.Nombre</td>
                                                     <td>@item.Ayudante</td>
-                                                    <td><a href="@Url.Action("Descargar","Home",new { id = item.Id })" class="btn btn-primary btn-sm" style="text-decoration:none;color:white;">Descargar</a></td>
+                                                    <td>
+                                                        <a href="@Url.Action("Descargar","Home",new { id = item.Id })" class="btn btn-primary btn-sm m-1" style="text-decoration:none;color:white;">Descargar</a>
+                                                        <a class="btn btn-danger btn-sm m-1" style="text-decoration:none;color:white;" onclick=confirmar('@item?.Id?.Trim()')>Eliminar</a>
+                                                    </td>
                                                 </tr>
                         }
                     }
@@ -73,6 +87,24 @@
 
 @section Scripts {
     <script>
+
+        function confirmar(idValue) {
+            if (confirm("¿Seguro que desea eliminar este registro?")) {
+                $.ajax({
+                    url: "@Url.Action("Eliminar", "Home")?id=" + idValue,
+                    method: "POST",
+                    success: function (a) {
+                        alert(a);
+                        window.location.reload();
+                    },
+                    error: function (e) {
+                        alert(e);
+                    }
+                });
+            }
+            return false;
+        }
+
         window.onload = function (e) {
 
             // VALIDACION DE FECHAS.. PARA DESPUÉS
@@ -99,6 +131,8 @@
 
                 window.location.replace("@Url.Action("Lista","Home")?fechaInicio=" + $("#fechaInicio").val() + "&fechaFin=" + $("#fechaFin").val() + "");
             });
+
+            
         }
     </script>
 }
